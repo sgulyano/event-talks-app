@@ -40,11 +40,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const charCountText = document.getElementById('char-count-text');
     const charProgressCircle = document.getElementById('char-progress-circle');
     const composerWarning = document.getElementById('composer-warning');
+    const themeToggleBtn = document.getElementById('theme-toggle');
 
     // SVG Circumference for Char Counter progress circle: 2 * PI * r (r = 14 => ~88)
     const CIRCUMFERENCE = 2 * Math.PI * 14;
     charProgressCircle.style.strokeDasharray = `${CIRCUMFERENCE} ${CIRCUMFERENCE}`;
     charProgressCircle.style.strokeDashoffset = CIRCUMFERENCE;
+
+    // Check theme preference
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    if (currentTheme === 'light') {
+        document.body.classList.add('light-theme');
+        themeToggleBtn.querySelector('.sun-icon').classList.remove('hidden');
+        themeToggleBtn.querySelector('.moon-icon').classList.add('hidden');
+    }
 
     // Helper: Format cache age/timestamp
     function formatTime(timestamp) {
@@ -580,6 +589,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     btnExportCSV.addEventListener('click', exportToCSV);
+
+    // Theme Toggle Handler
+    themeToggleBtn.addEventListener('click', () => {
+        const isLight = document.body.classList.toggle('light-theme');
+        const sunIcon = themeToggleBtn.querySelector('.sun-icon');
+        const moonIcon = themeToggleBtn.querySelector('.moon-icon');
+        
+        if (isLight) {
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+            localStorage.setItem('theme', 'light');
+        } else {
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+            localStorage.setItem('theme', 'dark');
+        }
+    });
 
     // Initialize App Load
     loadFeed();
