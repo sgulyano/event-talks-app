@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectionCard = document.getElementById('selection-card');
     const selectedCountBadge = document.getElementById('selected-count-badge');
     const btnTweetSelected = document.getElementById('btn-tweet-selected');
+    const btnExportCSV = document.getElementById('btn-export-csv');
     
     // Modal Elements
     const tweetModal = document.getElementById('tweet-modal');
@@ -542,6 +543,43 @@ document.addEventListener('DOMContentLoaded', () => {
         window.open(twitterUrl, '_blank', 'noopener,noreferrer');
         closeModal();
     });
+
+    // CSV Exporter Utility
+    function escapeCSV(val) {
+        if (val === null || val === undefined) return '';
+        let stringVal = String(val);
+        stringVal = stringVal.replace(/"/g, '""');
+        if (stringVal.includes(',') || stringVal.includes('\n') || stringVal.includes('"')) {
+            return `"${stringVal}"`;
+        }
+        return stringVal;
+    }
+
+    function exportToCSV() {
+        const filtered = getFilteredUpdates();
+        if (filtered.length === 0) {
+            alert("No data available to export.");
+            return;
+        }
+
+        let csvContent = "Date,Type,Description,Link\n";
+        filtered.forEach(item => {
+            const cleanText = stripHtml(item.text).trim();
+            const link = item.base_link || 'https://docs.cloud.google.com/bigquery/docs/release-notes';
+            csvContent += `${escapeCSV(item.date)},${escapeCSV(item.type)},${escapeCSV(cleanText)},${escapeCSV(link)}\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `bigquery_release_notes_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    btnExportCSV.addEventListener('click', exportToCSV);
 
     // Initialize App Load
     loadFeed();
